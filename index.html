@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>iRock App</title><meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body { font-family:sans-serif; margin:0; padding:1em; background:#f4f4f4; }
+  h1 { text-align:center; }
+  .person { background:white; border-radius:8px; margin-bottom:1em; padding:1em; box-shadow:0 2px 4px rgba(0,0,0,0.1); }
+  .details { display:none; margin-top:1em; }
+  button { margin:0.2em; }
+  .entry { font-size:0.9em; color:#333; margin-left:1em; }
+</style></head>
+<body>
+<h1>iRock – Debt Tracker</h1><div id="list"></div>
+<script>
+  const preset=[1,0.5,0.2,0.1];
+  function load(){
+    const d=localStorage.getItem("irockData");
+    return d?JSON.parse(d):[{name:"Alex",total:0,items:[]},{name:"Jamie",total:0,items:[]},{name:"Morgan",total:0,items:[]}];
+  }
+  function save(d){localStorage.setItem("irockData",JSON.stringify(d));}
+  let people=load();
+  function ts(){return new Date().toLocaleString();}
+  function render(){
+    const c=document.getElementById("list");
+    c.innerHTML="";
+    people.forEach((p,i)=>{
+      const div=document.createElement("div");
+      div.className="person";
+      div.innerHTML=\`<strong>\${p.name}</strong>: $\${p.total.toFixed(2)} <button onclick="t(\${i})">Toggle</button><div class="details" id="d\${i}">\${p.items.map(e=>\`<div class="entry">\${e}</div>\`).join("")}<div>\${preset.map(v=>\`<button onclick="add(\${i},\${v})">$\${(v*100).toFixed(0)}</button>\`).join("")}<button onclick="pay(\${i})">Payment</button></div>\`;
+      c.appendChild(div);
+    });
+  }
+  function t(i){const e=document.getElementById("d"+i);e.style.display=e.style.display==="block"?"none":"block";}
+  function add(i,v){
+    const x=v*100;
+    people[i].total+=x;
+    people[i].items.push(`+ $${x.toFixed(2)} (${ts()})`);
+    save(people);render();
+  }
+  function pay(i){
+    const amt=prompt("Amount:");
+    const n=parseFloat(amt);
+    if(!isNaN(n)){people[i].total-=n;people[i].items.push(`– $${n.toFixed(2)} (${ts()})`);save(people);render();}
+  }
+  render();
+</script>
+</body></html>
